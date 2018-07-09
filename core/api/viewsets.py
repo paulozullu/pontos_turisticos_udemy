@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
@@ -12,7 +13,8 @@ class PontoTuristicoViewSet(ModelViewSet):
     serializer_class = PontoTuristicoSerializer
     filter_backends = (SearchFilter,)
     search_fields = ('nome', 'descricao', 'endereco__linha1')
-    lookup_field = 'nome'
+    #    lookup_field = 'nome'
+    lookup_field = 'id'
     permission_classes = (IsAuthenticated,)
     authentication_classes = (TokenAuthentication,)
 
@@ -58,3 +60,14 @@ class PontoTuristicoViewSet(ModelViewSet):
     @action(methods=['get'], detail=False)
     def teste(self, request):
         pass
+
+    @action(methods=['post'], detail=True)
+    def associa_atracoes(self, request, id):
+        atracoes = request.data['ids']
+
+        ponto = PontoTuristico.objects.get(id=id)
+
+        ponto.atracoes.set(atracoes)
+
+        ponto.save()
+        return HttpResponse("OK")
